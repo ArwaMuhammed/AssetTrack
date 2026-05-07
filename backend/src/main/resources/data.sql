@@ -5,10 +5,10 @@ INSERT INTO users (name, email, password_hash, role, created_at) VALUES
                                                                      ('Dev User', 'dev@assettrack.com', 'hashed_pw', 'DEVELOPER', NOW());
 
 -- ASSETS
-INSERT INTO assets (type, brand, model, serial_number, purchase_date, warranty_expiration_date, status, condition, created_at)
+INSERT INTO assets (type, brand, model, serial_number, purchase_date, warranty_expiration_date, status, created_at)
 VALUES
-    ('LAPTOP', 'Dell', 'XPS 15', 'SN12345', '2023-01-01', '2026-01-01', 'AVAILABLE', 'GOOD', NOW()),
-    ('MONITOR', 'LG', 'UltraWide', 'SN67890', '2022-05-01', '2025-05-01', 'AVAILABLE', 'GOOD', NOW());
+    ('LAPTOP', 'Dell', 'XPS 15', 'SN12345', '2023-01-01', '2026-01-01', 'AVAILABLE', NOW()),
+    ('MONITOR', 'LG', 'UltraWide', 'SN67890', '2022-05-01', '2025-05-01', 'AVAILABLE', NOW());
 
 -- ACCESSORY STOCK
 INSERT INTO accessory_stocks (name, quantity, minimum_required_quantity, updated_at)

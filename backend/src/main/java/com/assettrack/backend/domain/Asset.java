@@ -12,29 +12,22 @@ public class Asset {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    private AssetType type;
+    @Column(unique = true, nullable = false)
+    private String serialNumber;
 
     private String brand;
 
     private String model;
 
-    @Column(unique = true, nullable = false)
-    private String serialNumber;
-
-    private LocalDate purchaseDate;
-
-    private LocalDate warrantyExpirationDate;
+    @Enumerated(EnumType.STRING)
+    private AssetType type;
 
     @Enumerated(EnumType.STRING)
     private AssetStatus status;
 
-    @Enumerated(EnumType.STRING)
-    private AssetCondition condition;
+    private LocalDate purchaseDate;
 
-    @ManyToOne
-    @JoinColumn(name = "current_assigned_user_id")
-    private User currentAssignedUser;
+    private LocalDate warrantyExpirationDate;
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -42,12 +35,12 @@ public class Asset {
         return id;
     }
 
-    public AssetType getType() {
-        return type;
+    public String getSerialNumber() {
+        return serialNumber;
     }
 
-    public void setType(AssetType type) {
-        this.type = type;
+    public void setSerialNumber(String serialNumber) {
+        this.serialNumber = serialNumber;
     }
 
     public String getBrand() {
@@ -66,12 +59,20 @@ public class Asset {
         this.model = model;
     }
 
-    public String getSerialNumber() {
-        return serialNumber;
+    public AssetType getType() {
+        return type;
     }
 
-    public void setSerialNumber(String serialNumber) {
-        this.serialNumber = serialNumber;
+    public void setType(AssetType type) {
+        this.type = type;
+    }
+
+    public AssetStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(AssetStatus status) {
+        this.status = status;
     }
 
     public LocalDate getPurchaseDate() {
@@ -88,30 +89,6 @@ public class Asset {
 
     public void setWarrantyExpirationDate(LocalDate warrantyExpirationDate) {
         this.warrantyExpirationDate = warrantyExpirationDate;
-    }
-
-    public AssetStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(AssetStatus status) {
-        this.status = status;
-    }
-
-    public AssetCondition getCondition() {
-        return condition;
-    }
-
-    public void setCondition(AssetCondition condition) {
-        this.condition = condition;
-    }
-
-    public User getCurrentAssignedUser() {
-        return currentAssignedUser;
-    }
-
-    public void setCurrentAssignedUser(User currentAssignedUser) {
-        this.currentAssignedUser = currentAssignedUser;
     }
 
     public LocalDateTime getCreatedAt() {

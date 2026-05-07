@@ -4,7 +4,5 @@ public enum AssetStatus {
     AVAILABLE,
     ASSIGNED,
     MAINTENANCE,
-    EXPIRED,
-    DECOMMISSIONED,
-    SPARE
+    DECOMMISSIONED
 }
