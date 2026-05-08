@@ -1,0 +1,265 @@
+{
+  "info": {
+    "name": "AssetTrack FULL API TEST",
+    "_postman_id": "assettrack-full",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "AUTH",
+      "item": [
+        {
+          "name": "Signup",
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8080/api/auth/signup",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nada\",\n  \"email\": \"nada@test.com\",\n  \"password\": \"123456\",\n  \"role\": \"DEVELOPER\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8080/api/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"nada@test.com\",\n  \"password\": \"123456\"\n}"
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "USERS",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8080/api/users",
+            "header": [
+              { "key": "Authorization", "value": "Bearer YOUR_TOKEN" }
+            ]
+          }
+        },
+        {
+          "name": "Get User By ID",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8080/api/users/1",
+            "header": [
+              { "key": "Authorization", "value": "Bearer YOUR_TOKEN" }
+            ]
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "url": "http://localhost:8080/api/users/1",
+            "header": [
+              { "key": "Authorization", "value": "Bearer YOUR_TOKEN" }
+            ]
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "ASSETS",
+      "item": [
+        {
+          "name": "Create Asset",
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8080/api/assets",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer YOUR_TOKEN" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"serialNumber\": \"SN001\",\n  \"brand\": \"Dell\",\n  \"model\": \"XPS\",\n  \"type\": \"LAPTOP\",\n  \"purchaseDate\": \"2024-01-01\",\n  \"warrantyExpirationDate\": \"2026-01-01\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get All Assets",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8080/api/assets",
+            "header": [
+              { "key": "Authorization", "value": "Bearer YOUR_TOKEN" }
+            ]
+          }
+        },
+        {
+          "name": "Get Asset By ID",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8080/api/assets/1",
+            "header": [
+              { "key": "Authorization", "value": "Bearer YOUR_TOKEN" }
+            ]
+          }
+        },
+        {
+          "name": "Update Asset",
+          "request": {
+            "method": "PUT",
+            "url": "http://localhost:8080/api/assets/1",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer YOUR_TOKEN" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"brand\": \"HP\",\n  \"model\": \"EliteBook\",\n  \"status\": \"AVAILABLE\",\n  \"warrantyExpirationDate\": \"2027-01-01\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Asset",
+          "request": {
+            "method": "DELETE",
+            "url": "http://localhost:8080/api/assets/1",
+            "header": [
+              { "key": "Authorization", "value": "Bearer YOUR_TOKEN" }
+            ]
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "ALLOCATIONS",
+      "item": [
+        {
+          "name": "Allocate Asset",
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8080/api/allocations",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer YOUR_TOKEN" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assetId\": 1,\n  \"userId\": 2\n}"
+            }
+          }
+        },
+        {
+          "name": "Return Asset",
+          "request": {
+            "method": "PUT",
+            "url": "http://localhost:8080/api/allocations/return/1",
+            "header": [
+              { "key": "Authorization", "value": "Bearer YOUR_TOKEN" }
+            ]
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "REPORTS",
+      "item": [
+        {
+          "name": "Create Report",
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8080/api/reports",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer YOUR_TOKEN" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assetId\": 1,\n  \"issueTitle\": \"Screen issue\",\n  \"description\": \"Laptop screen flickering\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get My Reports",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8080/api/reports/my",
+            "header": [
+              { "key": "Authorization", "value": "Bearer YOUR_TOKEN" }
+            ]
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "NOTIFICATIONS",
+      "item": [
+        {
+          "name": "Get My Notifications",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8080/api/notifications",
+            "header": [
+              { "key": "Authorization", "value": "Bearer YOUR_TOKEN" }
+            ]
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "DASHBOARD",
+      "item": [
+        {
+          "name": "Get Dashboard",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8080/api/dashboard",
+            "header": [
+              { "key": "Authorization", "value": "Bearer YOUR_TOKEN" }
+            ]
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "STOCK",
+      "item": [
+        {
+          "name": "Create Stock",
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8080/api/stock",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer YOUR_TOKEN" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Mouse\",\n  \"quantity\": 10,\n  \"minimumRequiredQuantity\": 3\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Low Stock",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8080/api/stock/low-stock",
+            "header": [
+              { "key": "Authorization", "value": "Bearer YOUR_TOKEN" }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,42 +1,57 @@
 package com.assettrack.backend.service;
 
 import com.assettrack.backend.domain.User;
-import com.assettrack.backend.dto.UserDTO;
+import com.assettrack.backend.dto.user.UserResponse;
+import com.assettrack.backend.exception.ResourceNotFoundException;
+import com.assettrack.backend.mapper.UserMapper;
 import com.assettrack.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository,
+                       UserMapper userMapper) {
         this.userRepository = userRepository;
+        this.userMapper = userMapper;
     }
 
-    /** Return all users — passwordHash is never included (UserDTO.fromUser filters it out) */
-    public List<UserDTO> getAllUsers() {
+    // ======================================================
+    // GET ALL USERS
+    // ======================================================
+    public List<UserResponse> getAllUsers() {
         return userRepository.findAll()
                 .stream()
-                .map(UserDTO::fromUser)
-                .collect(Collectors.toList());
+                .map(userMapper::toResponse)
+                .toList();
     }
 
-    /** Return a single user by ID */
-    public UserDTO getUserById(Long id) {
+    // ======================================================
+    // GET USER BY ID
+    // ======================================================
+    public UserResponse getUserById(Long id) {
+
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
-        return UserDTO.fromUser(user);
+                .orElseThrow(() ->
+                new ResourceNotFoundException("User not found with id: " + id));
+
+        return userMapper.toResponse(user);
     }
 
-    /** Delete a user — ADMIN only (enforced in controller via @PreAuthorize) */
+    // ======================================================
+    // DELETE USER
+    // ======================================================
     public void deleteUser(Long id) {
+
         if (!userRepository.existsById(id)) {
-            throw new RuntimeException("User not found with id: " + id);
+            throw new ResourceNotFoundException("User not found with id: " + id);
         }
+
         userRepository.deleteById(id);
     }
 }

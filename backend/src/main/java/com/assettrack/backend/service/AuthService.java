@@ -1,15 +1,18 @@
 package com.assettrack.backend.service;
 
 import com.assettrack.backend.domain.User;
-import com.assettrack.backend.dto.AuthResponse;
-import com.assettrack.backend.dto.LoginRequest;
-import com.assettrack.backend.dto.SignupRequest;
+import com.assettrack.backend.dto.auth.AuthResponse;
+import com.assettrack.backend.dto.auth.LoginRequest;
+import com.assettrack.backend.dto.auth.SignupRequest;
+import com.assettrack.backend.exception.AuthenticationFailedException;
+import com.assettrack.backend.exception.ConflictException;
+import com.assettrack.backend.exception.ResourceNotFoundException;
 import com.assettrack.backend.repository.UserRepository;
 import com.assettrack.backend.security.JwtService;
+import com.assettrack.backend.security.CustomUserDetailsService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -20,14 +23,14 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
-    private final UserDetailsService userDetailsService;
+    private final CustomUserDetailsService userDetailsService;
 
     public AuthService(
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
             JwtService jwtService,
             AuthenticationManager authenticationManager,
-            UserDetailsService userDetailsService
+            CustomUserDetailsService userDetailsService
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -36,47 +39,58 @@ public class AuthService {
         this.userDetailsService = userDetailsService;
     }
 
-    /**
-     * Register a new user.
-     * The raw password is BCrypt-hashed and stored in the `passwordHash` column.
-     */
+    // ======================================================
+    // SIGNUP
+    // ======================================================
     public AuthResponse signup(SignupRequest request) {
+
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already registered: " + request.getEmail());
+                        throw new ConflictException("Email already registered");
         }
 
         User user = new User();
         user.setName(request.getName());
         user.setEmail(request.getEmail());
-        user.setPasswordHash(passwordEncoder.encode(request.getPassword())); // → `password_hash` column
+        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         user.setRole(request.getRole());
-
         userRepository.save(user);
 
-        // Generate token immediately so the user is logged in after registering
-        UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
+        UserDetails userDetails =
+                userDetailsService.loadUserByUsername(user.getEmail());
+
         String token = jwtService.generateToken(userDetails);
 
-        return new AuthResponse(token, user.getEmail(), user.getRole().name());
+        return AuthResponse.builder()
+                .token(token)
+                .email(user.getEmail())
+                .role(user.getRole().name())
+                .build();
     }
 
-    /**
-     * Authenticate an existing user.
-     * AuthenticationManager verifies email + password via CustomUserDetailsService.
-     */
+    // ======================================================
+    // LOGIN
+    // ======================================================
     public AuthResponse login(LoginRequest request) {
-        // This will throw BadCredentialsException if wrong — Spring handles the 401 response
+
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+                new UsernamePasswordAuthenticationToken(
+                        request.getEmail(),
+                        request.getPassword()
+                )
         );
 
-        UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmail());
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new AuthenticationFailedException("Invalid email or password"));
+
+        UserDetails userDetails =
+                userDetailsService.loadUserByUsername(user.getEmail());
+
         String token = jwtService.generateToken(userDetails);
 
-        // Fetch role for the response
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        return new AuthResponse(token, user.getEmail(), user.getRole().name());
+        return AuthResponse.builder()
+                .token(token)
+                .email(user.getEmail())
+                .role(user.getRole().name())
+                .build();
     }
 }

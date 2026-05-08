@@ -31,6 +31,8 @@ public class Asset {
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
+
+
     public Long getId() {
         return id;
     }
