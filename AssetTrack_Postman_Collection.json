@@ -5,31 +5,98 @@
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
+
     {
       "name": "AUTH",
       "item": [
         {
-          "name": "Signup",
+          "name": "Signup — success (DEVELOPER)",
           "request": {
             "method": "POST",
             "url": "http://localhost:8080/api/auth/signup",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Nada\",\n  \"email\": \"nada@test.com\",\n  \"password\": \"123456\",\n  \"role\": \"DEVELOPER\"\n}"
-            }
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Nada\",\n  \"email\": \"nada@test.com\",\n  \"password\": \"123456\",\n  \"role\": \"DEVELOPER\"\n}" }
           }
         },
         {
-          "name": "Login",
+          "name": "Signup — success (ADMIN)",
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8080/api/auth/signup",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Admin User\",\n  \"email\": \"admin@test.com\",\n  \"password\": \"123456\",\n  \"role\": \"ADMIN\"\n}" }
+          }
+        },
+        {
+          "name": "Signup — success (MANAGER)",
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8080/api/auth/signup",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Manager User\",\n  \"email\": \"manager@test.com\",\n  \"password\": \"123456\",\n  \"role\": \"MANAGER\"\n}" }
+          }
+        },
+        {
+          "name": "Signup — duplicate email (expect 409)",
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8080/api/auth/signup",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Nada\",\n  \"email\": \"nada@test.com\",\n  \"password\": \"123456\",\n  \"role\": \"DEVELOPER\"\n}" }
+          }
+        },
+        {
+          "name": "Signup — missing email (expect 400)",
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8080/api/auth/signup",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Nada\",\n  \"password\": \"123456\",\n  \"role\": \"DEVELOPER\"\n}" }
+          }
+        },
+        {
+          "name": "Signup — invalid email format (expect 400)",
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8080/api/auth/signup",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Nada\",\n  \"email\": \"not-an-email\",\n  \"password\": \"123456\",\n  \"role\": \"DEVELOPER\"\n}" }
+          }
+        },
+        {
+          "name": "Login — success",
           "request": {
             "method": "POST",
             "url": "http://localhost:8080/api/auth/login",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"nada@test.com\",\n  \"password\": \"123456\"\n}"
-            }
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"nada@test.com\",\n  \"password\": \"123456\"\n}" }
+          }
+        },
+        {
+          "name": "Login — wrong password (expect 401)",
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8080/api/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"nada@test.com\",\n  \"password\": \"wrongpass\"\n}" }
+          }
+        },
+        {
+          "name": "Login — user not found (expect 401)",
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8080/api/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"ghost@test.com\",\n  \"password\": \"123456\"\n}" }
+          }
+        },
+        {
+          "name": "Login — missing password (expect 400)",
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8080/api/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"nada@test.com\"\n}" }
           }
         }
       ]
@@ -39,33 +106,146 @@
       "name": "USERS",
       "item": [
         {
-          "name": "Get All Users",
+          "name": "Get All Users — success (ADMIN token)",
           "request": {
             "method": "GET",
             "url": "http://localhost:8080/api/users",
-            "header": [
-              { "key": "Authorization", "value": "Bearer YOUR_TOKEN" }
-            ]
+            "header": [{ "key": "Authorization", "value": "Bearer ADMIN_TOKEN" }]
           }
         },
         {
-          "name": "Get User By ID",
+          "name": "Get All Users — no token (expect 403)",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8080/api/users",
+            "header": []
+          }
+        },
+        {
+          "name": "Get All Users — DEVELOPER token (expect 403)",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8080/api/users",
+            "header": [{ "key": "Authorization", "value": "Bearer DEVELOPER_TOKEN" }]
+          }
+        },
+        {
+          "name": "Get User By ID — success",
           "request": {
             "method": "GET",
             "url": "http://localhost:8080/api/users/1",
-            "header": [
-              { "key": "Authorization", "value": "Bearer YOUR_TOKEN" }
-            ]
+            "header": [{ "key": "Authorization", "value": "Bearer ADMIN_TOKEN" }]
           }
         },
         {
-          "name": "Delete User",
+          "name": "Get User By ID — not found (expect 404)",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8080/api/users/9999",
+            "header": [{ "key": "Authorization", "value": "Bearer ADMIN_TOKEN" }]
+          }
+        },
+        {
+          "name": "Update User Role — to MANAGER (expect 200)",
+          "request": {
+            "method": "PATCH",
+            "url": "http://localhost:8080/api/users/3/role",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer ADMIN_TOKEN" }],
+            "body": { "mode": "raw", "raw": "{\n  \"role\": \"MANAGER\"\n}" }
+          }
+        },
+        {
+          "name": "Update User Role — same role (expect 409)",
+          "request": {
+            "method": "PATCH",
+            "url": "http://localhost:8080/api/users/3/role",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer ADMIN_TOKEN" }],
+            "body": { "mode": "raw", "raw": "{\n  \"role\": \"DEVELOPER\"\n}" }
+          }
+        },
+        {
+          "name": "Update User Role — admin changes own role (expect 403)",
+          "request": {
+            "method": "PATCH",
+            "url": "http://localhost:8080/api/users/1/role",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer ADMIN_TOKEN" }],
+            "body": { "mode": "raw", "raw": "{\n  \"role\": \"MANAGER\"\n}" }
+          }
+        },
+        {
+          "name": "Update User Role — change another admin (expect 403)",
+          "request": {
+            "method": "PATCH",
+            "url": "http://localhost:8080/api/users/2/role",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer ADMIN_TOKEN" }],
+            "body": { "mode": "raw", "raw": "{\n  \"role\": \"DEVELOPER\"\n}" }
+          }
+        },
+        {
+          "name": "Update User Role — missing role (expect 400)",
+          "request": {
+            "method": "PATCH",
+            "url": "http://localhost:8080/api/users/3/role",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer ADMIN_TOKEN" }],
+            "body": { "mode": "raw", "raw": "{\n  \"role\": null\n}" }
+          }
+        },
+        {
+          "name": "Update User Role — user not found (expect 404)",
+          "request": {
+            "method": "PATCH",
+            "url": "http://localhost:8080/api/users/9999/role",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer ADMIN_TOKEN" }],
+            "body": { "mode": "raw", "raw": "{\n  \"role\": \"MANAGER\"\n}" }
+          }
+        },
+        {
+          "name": "Update User Role — no token (expect 403)",
+          "request": {
+            "method": "PATCH",
+            "url": "http://localhost:8080/api/users/3/role",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"role\": \"MANAGER\"\n}" }
+          }
+        },
+        {
+          "name": "Delete User — success (expect 204)",
+          "request": {
+            "method": "DELETE",
+            "url": "http://localhost:8080/api/users/3",
+            "header": [{ "key": "Authorization", "value": "Bearer ADMIN_TOKEN" }]
+          }
+        },
+        {
+          "name": "Delete User — admin deletes self (expect 403)",
           "request": {
             "method": "DELETE",
             "url": "http://localhost:8080/api/users/1",
-            "header": [
-              { "key": "Authorization", "value": "Bearer YOUR_TOKEN" }
-            ]
+            "header": [{ "key": "Authorization", "value": "Bearer ADMIN_TOKEN" }]
+          }
+        },
+        {
+          "name": "Delete User — delete another admin (expect 403)",
+          "request": {
+            "method": "DELETE",
+            "url": "http://localhost:8080/api/users/2",
+            "header": [{ "key": "Authorization", "value": "Bearer ADMIN_TOKEN" }]
+          }
+        },
+        {
+          "name": "Delete User — not found (expect 404)",
+          "request": {
+            "method": "DELETE",
+            "url": "http://localhost:8080/api/users/9999",
+            "header": [{ "key": "Authorization", "value": "Bearer ADMIN_TOKEN" }]
+          }
+        },
+        {
+          "name": "Delete User — no token (expect 403)",
+          "request": {
+            "method": "DELETE",
+            "url": "http://localhost:8080/api/users/3",
+            "header": []
           }
         }
       ]
@@ -75,63 +255,131 @@
       "name": "ASSETS",
       "item": [
         {
-          "name": "Create Asset",
+          "name": "Create Asset — success (expect 201)",
           "request": {
             "method": "POST",
             "url": "http://localhost:8080/api/assets",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer YOUR_TOKEN" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"serialNumber\": \"SN001\",\n  \"brand\": \"Dell\",\n  \"model\": \"XPS\",\n  \"type\": \"LAPTOP\",\n  \"purchaseDate\": \"2024-01-01\",\n  \"warrantyExpirationDate\": \"2026-01-01\"\n}"
-            }
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer ADMIN_TOKEN" }],
+            "body": { "mode": "raw", "raw": "{\n  \"serialNumber\": \"SN001\",\n  \"brand\": \"Dell\",\n  \"model\": \"XPS\",\n  \"type\": \"LAPTOP\",\n  \"purchaseDate\": \"2024-01-01\",\n  \"warrantyExpirationDate\": \"2026-01-01\"\n}" }
           }
         },
         {
-          "name": "Get All Assets",
+          "name": "Create Asset — duplicate serial number (expect 409)",
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8080/api/assets",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer ADMIN_TOKEN" }],
+            "body": { "mode": "raw", "raw": "{\n  \"serialNumber\": \"SN001\",\n  \"brand\": \"HP\",\n  \"model\": \"EliteBook\",\n  \"type\": \"LAPTOP\",\n  \"purchaseDate\": \"2024-01-01\",\n  \"warrantyExpirationDate\": \"2026-01-01\"\n}" }
+          }
+        },
+        {
+          "name": "Create Asset — warranty before purchase date (expect 400)",
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8080/api/assets",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer ADMIN_TOKEN" }],
+            "body": { "mode": "raw", "raw": "{\n  \"serialNumber\": \"SN002\",\n  \"brand\": \"Dell\",\n  \"model\": \"XPS\",\n  \"type\": \"LAPTOP\",\n  \"purchaseDate\": \"2024-06-01\",\n  \"warrantyExpirationDate\": \"2023-01-01\"\n}" }
+          }
+        },
+        {
+          "name": "Create Asset — missing required fields (expect 400)",
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8080/api/assets",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer ADMIN_TOKEN" }],
+            "body": { "mode": "raw", "raw": "{\n  \"brand\": \"Dell\"\n}" }
+          }
+        },
+        {
+          "name": "Create Asset — DEVELOPER token (expect 403)",
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8080/api/assets",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer DEVELOPER_TOKEN" }],
+            "body": { "mode": "raw", "raw": "{\n  \"serialNumber\": \"SN003\",\n  \"brand\": \"Dell\",\n  \"model\": \"XPS\",\n  \"type\": \"LAPTOP\",\n  \"purchaseDate\": \"2024-01-01\",\n  \"warrantyExpirationDate\": \"2026-01-01\"\n}" }
+          }
+        },
+        {
+          "name": "Get All Assets — success (expect 200)",
           "request": {
             "method": "GET",
             "url": "http://localhost:8080/api/assets",
-            "header": [
-              { "key": "Authorization", "value": "Bearer YOUR_TOKEN" }
-            ]
+            "header": [{ "key": "Authorization", "value": "Bearer ADMIN_TOKEN" }]
           }
         },
         {
-          "name": "Get Asset By ID",
+          "name": "Get All Assets — no token (expect 403)",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8080/api/assets",
+            "header": []
+          }
+        },
+        {
+          "name": "Get Asset By ID — success (expect 200)",
           "request": {
             "method": "GET",
             "url": "http://localhost:8080/api/assets/1",
-            "header": [
-              { "key": "Authorization", "value": "Bearer YOUR_TOKEN" }
-            ]
+            "header": [{ "key": "Authorization", "value": "Bearer ADMIN_TOKEN" }]
           }
         },
         {
-          "name": "Update Asset",
+          "name": "Get Asset By ID — not found (expect 404)",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8080/api/assets/9999",
+            "header": [{ "key": "Authorization", "value": "Bearer ADMIN_TOKEN" }]
+          }
+        },
+        {
+          "name": "Update Asset — success (expect 200)",
           "request": {
             "method": "PUT",
             "url": "http://localhost:8080/api/assets/1",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer YOUR_TOKEN" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"brand\": \"HP\",\n  \"model\": \"EliteBook\",\n  \"status\": \"AVAILABLE\",\n  \"warrantyExpirationDate\": \"2027-01-01\"\n}"
-            }
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer ADMIN_TOKEN" }],
+            "body": { "mode": "raw", "raw": "{\n  \"brand\": \"HP\",\n  \"model\": \"EliteBook\",\n  \"status\": \"AVAILABLE\",\n  \"warrantyExpirationDate\": \"2027-01-01\"\n}" }
           }
         },
         {
-          "name": "Delete Asset",
+          "name": "Update Asset — not found (expect 404)",
+          "request": {
+            "method": "PUT",
+            "url": "http://localhost:8080/api/assets/9999",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer ADMIN_TOKEN" }],
+            "body": { "mode": "raw", "raw": "{\n  \"brand\": \"HP\",\n  \"model\": \"EliteBook\",\n  \"status\": \"AVAILABLE\",\n  \"warrantyExpirationDate\": \"2027-01-01\"\n}" }
+          }
+        },
+        {
+          "name": "Update Asset — DEVELOPER token (expect 403)",
+          "request": {
+            "method": "PUT",
+            "url": "http://localhost:8080/api/assets/1",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer DEVELOPER_TOKEN" }],
+            "body": { "mode": "raw", "raw": "{\n  \"brand\": \"HP\",\n  \"model\": \"EliteBook\",\n  \"status\": \"AVAILABLE\",\n  \"warrantyExpirationDate\": \"2027-01-01\"\n}" }
+          }
+        },
+        {
+          "name": "Delete Asset — success (expect 204)",
           "request": {
             "method": "DELETE",
             "url": "http://localhost:8080/api/assets/1",
-            "header": [
-              { "key": "Authorization", "value": "Bearer YOUR_TOKEN" }
-            ]
+            "header": [{ "key": "Authorization", "value": "Bearer ADMIN_TOKEN" }]
+          }
+        },
+        {
+          "name": "Delete Asset — not found (expect 404)",
+          "request": {
+            "method": "DELETE",
+            "url": "http://localhost:8080/api/assets/9999",
+            "header": [{ "key": "Authorization", "value": "Bearer ADMIN_TOKEN" }]
+          }
+        },
+        {
+          "name": "Delete Asset — DEVELOPER token (expect 403)",
+          "request": {
+            "method": "DELETE",
+            "url": "http://localhost:8080/api/assets/1",
+            "header": [{ "key": "Authorization", "value": "Bearer DEVELOPER_TOKEN" }]
           }
         }
       ]
@@ -141,28 +389,72 @@
       "name": "ALLOCATIONS",
       "item": [
         {
-          "name": "Allocate Asset",
+          "name": "Allocate Asset — success (expect 201)",
           "request": {
             "method": "POST",
             "url": "http://localhost:8080/api/allocations",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer YOUR_TOKEN" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"assetId\": 1,\n  \"userId\": 2\n}"
-            }
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer ADMIN_TOKEN" }],
+            "body": { "mode": "raw", "raw": "{\n  \"assetId\": 1,\n  \"userId\": 2\n}" }
           }
         },
         {
-          "name": "Return Asset",
+          "name": "Allocate Asset — already assigned (expect 409)",
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8080/api/allocations",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer ADMIN_TOKEN" }],
+            "body": { "mode": "raw", "raw": "{\n  \"assetId\": 1,\n  \"userId\": 3\n}" }
+          }
+        },
+        {
+          "name": "Allocate Asset — asset not found (expect 404)",
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8080/api/allocations",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer ADMIN_TOKEN" }],
+            "body": { "mode": "raw", "raw": "{\n  \"assetId\": 9999,\n  \"userId\": 2\n}" }
+          }
+        },
+        {
+          "name": "Allocate Asset — user not found (expect 404)",
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8080/api/allocations",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer ADMIN_TOKEN" }],
+            "body": { "mode": "raw", "raw": "{\n  \"assetId\": 1,\n  \"userId\": 9999\n}" }
+          }
+        },
+        {
+          "name": "Allocate Asset — no token (expect 403)",
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8080/api/allocations",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"assetId\": 1,\n  \"userId\": 2\n}" }
+          }
+        },
+        {
+          "name": "Return Asset — success (expect 200)",
           "request": {
             "method": "PUT",
             "url": "http://localhost:8080/api/allocations/return/1",
-            "header": [
-              { "key": "Authorization", "value": "Bearer YOUR_TOKEN" }
-            ]
+            "header": [{ "key": "Authorization", "value": "Bearer ADMIN_TOKEN" }]
+          }
+        },
+        {
+          "name": "Return Asset — already returned (expect 409)",
+          "request": {
+            "method": "PUT",
+            "url": "http://localhost:8080/api/allocations/return/1",
+            "header": [{ "key": "Authorization", "value": "Bearer ADMIN_TOKEN" }]
+          }
+        },
+        {
+          "name": "Return Asset — not found (expect 404)",
+          "request": {
+            "method": "PUT",
+            "url": "http://localhost:8080/api/allocations/return/9999",
+            "header": [{ "key": "Authorization", "value": "Bearer ADMIN_TOKEN" }]
           }
         }
       ]
@@ -172,28 +464,55 @@
       "name": "REPORTS",
       "item": [
         {
-          "name": "Create Report",
+          "name": "Create Report — success (expect 201)",
           "request": {
             "method": "POST",
             "url": "http://localhost:8080/api/reports",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer YOUR_TOKEN" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"assetId\": 1,\n  \"issueTitle\": \"Screen issue\",\n  \"description\": \"Laptop screen flickering\"\n}"
-            }
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer DEVELOPER_TOKEN" }],
+            "body": { "mode": "raw", "raw": "{\n  \"assetId\": 1,\n  \"issueTitle\": \"Screen issue\",\n  \"description\": \"Laptop screen flickering\"\n}" }
           }
         },
         {
-          "name": "Get My Reports",
+          "name": "Create Report — asset not found (expect 404)",
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8080/api/reports",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer DEVELOPER_TOKEN" }],
+            "body": { "mode": "raw", "raw": "{\n  \"assetId\": 9999,\n  \"issueTitle\": \"Screen issue\",\n  \"description\": \"Laptop screen flickering\"\n}" }
+          }
+        },
+        {
+          "name": "Create Report — missing fields (expect 400)",
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8080/api/reports",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer DEVELOPER_TOKEN" }],
+            "body": { "mode": "raw", "raw": "{\n  \"assetId\": 1\n}" }
+          }
+        },
+        {
+          "name": "Create Report — no token (expect 403)",
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8080/api/reports",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"assetId\": 1,\n  \"issueTitle\": \"Screen issue\",\n  \"description\": \"Laptop screen flickering\"\n}" }
+          }
+        },
+        {
+          "name": "Get My Reports — success (expect 200)",
           "request": {
             "method": "GET",
             "url": "http://localhost:8080/api/reports/my",
-            "header": [
-              { "key": "Authorization", "value": "Bearer YOUR_TOKEN" }
-            ]
+            "header": [{ "key": "Authorization", "value": "Bearer DEVELOPER_TOKEN" }]
+          }
+        },
+        {
+          "name": "Get My Reports — no token (expect 403)",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8080/api/reports/my",
+            "header": []
           }
         }
       ]
@@ -203,13 +522,19 @@
       "name": "NOTIFICATIONS",
       "item": [
         {
-          "name": "Get My Notifications",
+          "name": "Get My Notifications — success (expect 200)",
           "request": {
             "method": "GET",
             "url": "http://localhost:8080/api/notifications",
-            "header": [
-              { "key": "Authorization", "value": "Bearer YOUR_TOKEN" }
-            ]
+            "header": [{ "key": "Authorization", "value": "Bearer DEVELOPER_TOKEN" }]
+          }
+        },
+        {
+          "name": "Get My Notifications — no token (expect 403)",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8080/api/notifications",
+            "header": []
           }
         }
       ]
@@ -219,13 +544,27 @@
       "name": "DASHBOARD",
       "item": [
         {
-          "name": "Get Dashboard",
+          "name": "Get Dashboard — success ADMIN (expect 200)",
           "request": {
             "method": "GET",
             "url": "http://localhost:8080/api/dashboard",
-            "header": [
-              { "key": "Authorization", "value": "Bearer YOUR_TOKEN" }
-            ]
+            "header": [{ "key": "Authorization", "value": "Bearer ADMIN_TOKEN" }]
+          }
+        },
+        {
+          "name": "Get Dashboard — success MANAGER (expect 200)",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8080/api/dashboard",
+            "header": [{ "key": "Authorization", "value": "Bearer MANAGER_TOKEN" }]
+          }
+        },
+        {
+          "name": "Get Dashboard — no token (expect 403)",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8080/api/dashboard",
+            "header": []
           }
         }
       ]
@@ -235,31 +574,59 @@
       "name": "STOCK",
       "item": [
         {
-          "name": "Create Stock",
+          "name": "Create Stock — success (expect 201)",
           "request": {
             "method": "POST",
             "url": "http://localhost:8080/api/stock",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer YOUR_TOKEN" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Mouse\",\n  \"quantity\": 10,\n  \"minimumRequiredQuantity\": 3\n}"
-            }
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer ADMIN_TOKEN" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Mouse\",\n  \"quantity\": 10,\n  \"minimumRequiredQuantity\": 3\n}" }
           }
         },
         {
-          "name": "Get Low Stock",
+          "name": "Create Stock — negative quantity (expect 400)",
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8080/api/stock",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer ADMIN_TOKEN" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Mouse\",\n  \"quantity\": -5,\n  \"minimumRequiredQuantity\": 3\n}" }
+          }
+        },
+        {
+          "name": "Create Stock — missing name (expect 400)",
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8080/api/stock",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer ADMIN_TOKEN" }],
+            "body": { "mode": "raw", "raw": "{\n  \"quantity\": 10,\n  \"minimumRequiredQuantity\": 3\n}" }
+          }
+        },
+        {
+          "name": "Create Stock — DEVELOPER token (expect 403)",
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8080/api/stock",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer DEVELOPER_TOKEN" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Keyboard\",\n  \"quantity\": 5,\n  \"minimumRequiredQuantity\": 2\n}" }
+          }
+        },
+        {
+          "name": "Get Low Stock — success (expect 200)",
           "request": {
             "method": "GET",
             "url": "http://localhost:8080/api/stock/low-stock",
-            "header": [
-              { "key": "Authorization", "value": "Bearer YOUR_TOKEN" }
-            ]
+            "header": [{ "key": "Authorization", "value": "Bearer ADMIN_TOKEN" }]
+          }
+        },
+        {
+          "name": "Get Low Stock — no token (expect 403)",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8080/api/stock/low-stock",
+            "header": []
           }
         }
       ]
     }
+
   ]
 }
