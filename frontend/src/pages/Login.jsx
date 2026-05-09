@@ -6,7 +6,6 @@ import { LogIn, Mail, Lock, AlertCircle, Shield } from 'lucide-react';
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('DEVELOPER');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   
@@ -21,7 +20,7 @@ const Login = () => {
     setError('');
     setLoading(true);
 
-    const result = await login(email, password, role);
+    const result = await login(email, password);
     if (result.success) {
       navigate(from, { replace: true });
     } else {
@@ -101,31 +100,6 @@ const Login = () => {
                   fontSize: '1rem'
                 }}
               />
-            </div>
-          </div>
-
-          <div style={{ marginBottom: '1.25rem' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.9rem' }}>User Role</label>
-            <div style={{ position: 'relative' }}>
-              <Shield size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                required
-                style={{
-                  width: '100%',
-                  padding: '0.75rem 0.75rem 0.75rem 40px',
-                  borderRadius: 'var(--radius-sm)',
-                  border: '1px solid var(--border)',
-                  fontSize: '1rem',
-                  appearance: 'none',
-                  backgroundColor: 'white'
-                }}
-              >
-                <option value="ADMIN">Admin</option>
-                <option value="MANAGER">Manager</option>
-                <option value="DEVELOPER">Developer</option>
-              </select>
             </div>
           </div>
 

@@ -45,8 +45,20 @@ public class UserService {
 
     // UPDATE
     public UserResponse updateUser(Long id, com.assettrack.backend.dto.user.UserRequest request, String currentAdminEmail) {
+        User currentAdmin = userRepository.findByEmail(currentAdminEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("Admin not found"));
+
         User targetUser = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+
+        // Safety: Admin should not edit themselves or another admin through this generic user management
+        if (targetUser.getId().equals(currentAdmin.getId())) {
+            throw new ForbiddenOperationException("Please use Profile Settings to edit your own account");
+        }
+
+        if (targetUser.getRole() == Role.ADMIN) {
+            throw new ForbiddenOperationException("Cannot modify another Admin");
+        }
 
         // Check if new email is taken by another user
         userRepository.findByEmail(request.getEmail()).ifPresent(u -> {
