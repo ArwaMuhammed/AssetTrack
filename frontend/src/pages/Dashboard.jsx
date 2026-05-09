@@ -3,11 +3,13 @@ import { useAuth } from "../context/AuthContext";
 import { getDashboardStats } from "../services/assetService";
 import { StatusPieChart, TypeBarChart } from "../components/AssetComponents/Charts";
 import { Monitor, Users, AlertTriangle, CheckCircle, Clock } from "lucide-react";
+import { getAllAssets } from "../services/assetService";
 
 const Dashboard = () => {
   const { user } = useAuth();
   const [data, setData]       = React.useState(null);
   const [loading, setLoading] = React.useState(true);
+  const [assets, setAssets] = React.useState([]);
 
   React.useEffect(() => {
     if (user?.role === "ADMIN" || user?.role === "MANAGER") {
@@ -226,6 +228,45 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Assets by Assigned User */}
+      {data?.assetsByUser?.length > 0 && (
+        <div className="card" style={{ marginTop: "1.5rem" }}>
+          <h3 style={{ marginBottom: "1.25rem", fontWeight: 700, fontSize: "1rem" }}>
+            Assets by Assigned User
+          </h3>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.9rem" }}>
+            <thead>
+              <tr style={{ borderBottom: "1px solid var(--border)" }}>
+                <th style={{ padding: "0.6rem 1rem", textAlign: "left", color: "var(--text-muted)", fontWeight: 600, fontSize: "0.8rem" }}>USER</th>
+                <th style={{ padding: "0.6rem 1rem", textAlign: "left", color: "var(--text-muted)", fontWeight: 600, fontSize: "0.8rem" }}>ASSETS</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.assetsByUser.map((u) => (
+                <tr key={u.userId} style={{ borderBottom: "1px solid var(--border)" }}
+                  onMouseOver={(e) => e.currentTarget.style.background = "var(--background)"}
+                  onMouseOut={(e)  => e.currentTarget.style.background = "transparent"}
+                >
+                  <td style={{ padding: "0.75rem 1rem", fontWeight: 600 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                      <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#e0f2fe", color: "var(--primary)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: "0.85rem", flexShrink: 0 }}>
+                        {u.userName?.charAt(0)?.toUpperCase()}
+                      </div>
+                      {u.userName}
+                    </div>
+                  </td>
+                  <td style={{ padding: "0.75rem 1rem" }}>
+                    <span style={{ background: "var(--primary)", color: "#fff", borderRadius: 20, padding: "2px 10px", fontWeight: 700, fontSize: "0.82rem" }}>
+                      {u.assetCount}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 };

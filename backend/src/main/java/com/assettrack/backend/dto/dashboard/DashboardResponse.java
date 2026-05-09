@@ -1,6 +1,7 @@
 package com.assettrack.backend.dto.dashboard;
 
 import lombok.*;
+import java.util.List;
 import java.util.Map;
 
 @Data @Builder @NoArgsConstructor @AllArgsConstructor
@@ -14,4 +15,5 @@ public class DashboardResponse {
     private long openConditionReports;
     private Map<String, Long> assetsByType;
     private Map<String, Long> assetsByStatus;
+    private List<UserAssetCount> assetsByUser;
 }

@@ -4,12 +4,15 @@ import com.assettrack.backend.domain.AssetStatus;
 import com.assettrack.backend.domain.AssetType;
 import com.assettrack.backend.domain.ReportStatus;
 import com.assettrack.backend.dto.dashboard.DashboardResponse;
+import com.assettrack.backend.dto.dashboard.UserAssetCount;
+import com.assettrack.backend.repository.AssetAllocationRepository;
 import com.assettrack.backend.repository.AssetRepository;
 import com.assettrack.backend.repository.ConditionReportRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -18,11 +21,14 @@ public class DashboardService {
 
     private final AssetRepository assetRepository;
     private final ConditionReportRepository reportRepository;
+    private final AssetAllocationRepository allocationRepository;
 
     public DashboardService(AssetRepository assetRepository,
-                            ConditionReportRepository reportRepository) {
+                            ConditionReportRepository reportRepository,
+                            AssetAllocationRepository allocationRepository) {
         this.assetRepository = assetRepository;
         this.reportRepository = reportRepository;
+        this.allocationRepository = allocationRepository;
     }
 
     public DashboardResponse getDashboard() {
@@ -55,6 +61,22 @@ public class DashboardService {
                         status -> allAssets.stream().filter(a -> a.getStatus() == status).count()
                 ));
 
+        // Get assets grouped by assigned user
+        List<UserAssetCount> assetsByUser = allocationRepository.findAll().stream()
+                .filter(allocation -> allocation.getReturnedAt() == null) // Only current assignments
+                .filter(allocation -> allocation.getAsset().getStatus() == AssetStatus.ASSIGNED) // Only ASSIGNED status
+                .collect(Collectors.groupingBy(
+                        allocation -> allocation.getUser(),
+                        Collectors.counting()
+                ))
+                .entrySet().stream()
+                .map(entry -> UserAssetCount.builder()
+                        .userId(entry.getKey().getId())
+                        .userName(entry.getKey().getName())
+                        .assetCount(Math.toIntExact(entry.getValue()))
+                        .build())
+                .collect(Collectors.toList());
+
         return DashboardResponse.builder()
                 .totalAssets(total)
                 .assignedAssets(assigned)
@@ -65,6 +87,7 @@ public class DashboardService {
                 .openConditionReports(openReports)
                 .assetsByType(byType)
                 .assetsByStatus(byStatus)
+                .assetsByUser(assetsByUser)
                 .build();
     }
 }
