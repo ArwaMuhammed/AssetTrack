@@ -75,6 +75,24 @@ const Dashboard = () => {
     );
   }
 
+  if (user?.role === "DEVELOPER") {
+    return (
+      <div className="animate-fade-in">
+        <div style={{ marginBottom: "2rem" }}>
+          <h1 style={{ fontSize: "1.8rem", fontWeight: 800, marginBottom: "0.25rem" }}>
+            Welcome back, {user?.name}!
+          </h1>
+          <p style={{ color: "var(--text-muted)" }}>
+            You can view and manage your assigned assets below.
+          </p>
+        </div>
+        <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+          <a href="/assets" className="btn btn-primary">📋 View My Assets</a>
+          <a href="/search" className="btn" style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-muted)" }}>🔍 Search Assets</a>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="animate-fade-in">
       {/* Header */}

@@ -24,10 +24,10 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = async (email, password, role) => {
+  const login = async (email, password) => {
     try {
-      console.log('Sending login request:', { email, role }); // Don't log password
-      const response = await api.post('/auth/login', { email, password, role });
+      console.log('Sending login request:', { email }); // Don't log password
+      const response = await api.post('/auth/login', { email, password });
       const { token, role: userRole } = response.data;
       const userData = { 
         id: response.data.id || 1, 

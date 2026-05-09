@@ -55,7 +55,8 @@ function App() {
               </ProtectedRoute>
             }
           >
-            {/* ADMIN + MANAGER only */}
+            
+           {/* ADMIN + MANAGER only */}
             <Route
               element={
                 <ProtectedRoute allowedRoles={["ADMIN", "MANAGER"]}>
@@ -63,15 +64,16 @@ function App() {
                 </ProtectedRoute>
               }
             >
-              <Route path="/"          element={<Dashboard />} />
-              <Route path="/reports"   element={<Reports />} />
+              <Route path="/reports" element={<Reports />} />
             </Route>
+
+            {/* Dashboard — all authenticated users (Developer sees limited view) */}
+            <Route path="/" element={<Dashboard />} />
 
             {/* All authenticated users */}
             <Route path="/assets"          element={<Assets />} />
             <Route path="/assets/add"      element={<AddAsset />} />
             <Route path="/assets/:id"      element={<AssetDetails />} />
-            {/* Edit reuses AddAsset in edit mode — swap if you have a dedicated EditAsset */}
             <Route path="/assets/:id/edit" element={<AddAsset editMode />} />
             <Route path="/search"          element={<Search />} />
 
