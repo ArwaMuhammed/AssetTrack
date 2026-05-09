@@ -43,7 +43,7 @@ public class UserService {
         return userMapper.toResponse(userRepository.save(user));
     }
 
-    // UPDATE
+    // UPDATE (Only Role allowed)
     public UserResponse updateUser(Long id, com.assettrack.backend.dto.user.UserRequest request, String currentAdminEmail) {
         User currentAdmin = userRepository.findByEmail(currentAdminEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("Admin not found"));
@@ -51,7 +51,7 @@ public class UserService {
         User targetUser = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
-        // Safety: Admin should not edit themselves or another admin through this generic user management
+        // Safety: Admin should not edit themselves or another admin
         if (targetUser.getId().equals(currentAdmin.getId())) {
             throw new ForbiddenOperationException("Please use Profile Settings to edit your own account");
         }
@@ -60,21 +60,7 @@ public class UserService {
             throw new ForbiddenOperationException("Cannot modify another Admin");
         }
 
-        // Check if new email is taken by another user
-        userRepository.findByEmail(request.getEmail()).ifPresent(u -> {
-            if (!u.getId().equals(id)) {
-                throw new ConflictException("Email already taken: " + request.getEmail());
-            }
-        });
-
-        targetUser.setName(request.getName());
-        targetUser.setEmail(request.getEmail());
-        
-        // Only update password if provided
-        if (request.getPassword() != null && !request.getPassword().isBlank()) {
-            targetUser.setPasswordHash(passwordEncoder.encode(request.getPassword()));
-        }
-        
+        // Only role is allowed to be updated here as per requirement
         targetUser.setRole(request.getRole());
 
         return userMapper.toResponse(userRepository.save(targetUser));
