@@ -54,4 +54,13 @@ public class NotificationController {
         notificationService.markAllAsRead(userId);
         return ResponseEntity.noContent().build();
     }
+
+    // Temporary test endpoint — remove after confirming email works
+    @PostMapping("/test-email")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<String> testEmail(@AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = userDetailsService.getUserIdByEmail(userDetails.getUsername());
+        notificationService.sendTestEmail(userId);
+        return ResponseEntity.ok("Email sent! Check your Mailtrap inbox.");
+    }
 }

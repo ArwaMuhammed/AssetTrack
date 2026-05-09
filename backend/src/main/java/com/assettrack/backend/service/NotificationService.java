@@ -37,7 +37,7 @@ public class NotificationService {
      * Saves an in-app notification and also sends it to the user's email.
      */
     public void sendNotification(User user, String title, String message, NotificationType type) {
-        // 1. Save in-app notification (same as before)
+        // 1. Save in-app notification
         Notification notification = new Notification();
         notification.setUser(user);
         notification.setTitle(title);
@@ -45,13 +45,29 @@ public class NotificationService {
         notification.setType(type);
         notificationRepository.save(notification);
 
-        // 2. Also send an email to the user
+        // 2. Send email
         sendEmail(user.getEmail(), title, message);
     }
 
     /**
-     * Sends a plain-text email using the configured SMTP settings (Mailtrap).
-     * If sending fails, it logs the error but does NOT crash the app.
+     * Used by the test endpoint — looks up the user by ID then sends a test notification.
+     * Uses WARRANTY_EXPIRATION as a placeholder type since that is what exists in the enum.
+     */
+    public void sendTestEmail(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        sendNotification(
+                user,
+                "Test Notification",
+                "This is a test email from AssetTrack!",
+                NotificationType.WARRANTY_EXPIRATION
+        );
+    }
+
+    /**
+     * Sends a plain-text email via configured SMTP (Mailtrap).
+     * Logs error but does NOT crash the app if sending fails.
      */
     private void sendEmail(String toEmail, String subject, String body) {
         try {
