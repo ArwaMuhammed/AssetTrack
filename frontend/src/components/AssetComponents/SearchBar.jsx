@@ -8,45 +8,62 @@ export default function SearchBar({ onSearch, loading }) {
   const [type,   setType]   = useState("");
   const [status, setStatus] = useState("");
   const [brand,  setBrand]  = useState("");
+  const [model,  setModel]  = useState("");
   const [open,   setOpen]   = useState(false);
 
   const handleSearch = (e) => {
     e?.preventDefault();
-    onSearch({ query, type, status, brand });
+    onSearch({ query, type, status, brand, model });
   };
 
   const handleReset = () => {
-    setQuery(""); setType(""); setStatus(""); setBrand("");
+    setQuery(""); setType(""); setStatus(""); setBrand(""); setModel("");
     onSearch({});
   };
 
   const selectStyle = {
-    background: "#0d0f14", border: "1px solid #1e2028",
-    borderRadius: 8, padding: "8px 12px", color: "#cbd5e1",
-    fontFamily: "'JetBrains Mono', monospace", fontSize: 12,
-    outline: "none", cursor: "pointer",
+    background: "var(--background)",
+    border: "1px solid var(--border)",
+    borderRadius: "var(--radius-sm)",
+    padding: "8px 12px",
+    color: "var(--text-main)",
+    fontFamily: "inherit",
+    fontSize: "0.85rem",
+    outline: "none",
+    cursor: "pointer",
+    width: "100%",
+    boxSizing: "border-box",
+  };
+
+  const inputStyle = {
+    ...selectStyle,
+    cursor: "text",
   };
 
   return (
-    <form onSubmit={handleSearch} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+    <form onSubmit={handleSearch} style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
       {/* Main search row */}
-      <div style={{ display: "flex", gap: 10 }}>
+      <div style={{ display: "flex", gap: "0.6rem" }}>
         <div style={{ flex: 1, position: "relative" }}>
-          <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "#4b5563", fontSize: 16 }}>🔍</span>
+          <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)", fontSize: 16 }}>🔍</span>
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search by serial number, model, user..."
+            placeholder="Search by brand or model..."
             style={{
               width: "100%", boxSizing: "border-box",
-              background: "#0d0f14", border: "1px solid #1e2028",
-              borderRadius: 10, padding: "10px 14px 10px 42px",
-              color: "#f1f5f9", fontFamily: "'JetBrains Mono', monospace",
-              fontSize: 13, outline: "none",
+              background: "var(--surface)",
+              border: "1px solid var(--border)",
+              borderRadius: "var(--radius-sm)",
+              padding: "10px 14px 10px 42px",
+              color: "var(--text-main)",
+              fontFamily: "inherit",
+              fontSize: "0.9rem",
+              outline: "none",
               transition: "border-color 0.2s",
             }}
-            onFocus={(e) => (e.target.style.borderColor = "#3b82f6")}
-            onBlur={(e)  => (e.target.style.borderColor = "#1e2028")}
+            onFocus={(e) => (e.target.style.borderColor = "var(--primary)")}
+            onBlur={(e)  => (e.target.style.borderColor = "var(--border)")}
           />
         </div>
 
@@ -54,25 +71,31 @@ export default function SearchBar({ onSearch, loading }) {
           type="button"
           onClick={() => setOpen(!open)}
           style={{
-            ...selectStyle, display: "flex", alignItems: "center", gap: 6,
-            padding: "8px 16px", transition: "border-color 0.2s",
-            borderColor: open ? "#3b82f6" : "#1e2028",
+            background: open ? "#eff6ff" : "var(--surface)",
+            border: "1px solid",
+            borderColor: open ? "var(--primary)" : "var(--border)",
+            borderRadius: "var(--radius-sm)",
+            padding: "8px 16px",
+            color: open ? "var(--primary)" : "var(--text-muted)",
+            fontFamily: "inherit",
+            fontWeight: 600,
+            fontSize: "0.85rem",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            transition: "all 0.2s",
+            whiteSpace: "nowrap",
           }}
         >
-          <span>⚙</span> Filters {open ? "▲" : "▼"}
+          ⚙ Filters {open ? "▲" : "▼"}
         </button>
 
         <button
           type="submit"
           disabled={loading}
-          style={{
-            background: "#3b82f6", border: "none", borderRadius: 10,
-            padding: "10px 22px", color: "#fff", fontFamily: "'Syne', sans-serif",
-            fontWeight: 700, fontSize: 13, cursor: "pointer",
-            transition: "background 0.2s", whiteSpace: "nowrap",
-          }}
-          onMouseEnter={(e) => (e.target.style.background = "#2563eb")}
-          onMouseLeave={(e) => (e.target.style.background = "#3b82f6")}
+          className="btn btn-primary"
+          style={{ whiteSpace: "nowrap", opacity: loading ? 0.7 : 1 }}
         >
           {loading ? "Searching…" : "Search"}
         </button>
@@ -81,9 +104,13 @@ export default function SearchBar({ onSearch, loading }) {
       {/* Advanced filters panel */}
       {open && (
         <div style={{
-          display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
-          gap: 10, padding: "14px 16px",
-          background: "#0d0f14", border: "1px solid #1e2028", borderRadius: 10,
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
+          gap: "0.75rem",
+          padding: "1rem",
+          background: "var(--surface)",
+          border: "1px solid var(--border)",
+          borderRadius: "var(--radius-sm)",
           animation: "fadeIn 0.15s ease",
         }}>
           <FilterGroup label="Type">
@@ -102,8 +129,17 @@ export default function SearchBar({ onSearch, loading }) {
             <input
               value={brand}
               onChange={(e) => setBrand(e.target.value)}
-              placeholder="e.g. Dell, Apple…"
-              style={{ ...selectStyle, width: "100%", boxSizing: "border-box" }}
+              placeholder="e.g. Apple…"
+              style={inputStyle}
+            />
+          </FilterGroup>
+
+          <FilterGroup label="Model">
+            <input
+              value={model}
+              onChange={(e) => setModel(e.target.value)}
+              placeholder="e.g. MacBook…"
+              style={inputStyle}
             />
           </FilterGroup>
 
@@ -112,8 +148,13 @@ export default function SearchBar({ onSearch, loading }) {
               type="button"
               onClick={handleReset}
               style={{
-                ...selectStyle, color: "#ef4444", borderColor: "#ef444433",
-                width: "100%", textAlign: "center", cursor: "pointer",
+                ...selectStyle,
+                color: "var(--danger)",
+                borderColor: "#fca5a5",
+                background: "#fee2e2",
+                textAlign: "center",
+                cursor: "pointer",
+                fontWeight: 600,
               }}
             >
               ✕ Reset
@@ -127,8 +168,14 @@ export default function SearchBar({ onSearch, loading }) {
 
 function FilterGroup({ label, children }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-      <label style={{ fontSize: 10, color: "#4b5563", fontFamily: "'JetBrains Mono', monospace", textTransform: "uppercase", letterSpacing: 0.8 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
+      <label style={{
+        fontSize: "0.72rem",
+        color: "var(--text-muted)",
+        fontWeight: 600,
+        textTransform: "uppercase",
+        letterSpacing: 0.8,
+      }}>
         {label}
       </label>
       {children}

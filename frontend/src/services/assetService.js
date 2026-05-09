@@ -31,10 +31,25 @@ export const getAvailableSpareLaptop = () => api.get("/assets/spare-laptop");
 
 // ─── Search ─────────────────────────────────────────────────────────────────
 // Query params accepted: brand, model, type, status
-export const searchAssets = (params) => {
+export const searchAssets = async (params) => {
+  const { query, type, status } = params;
+
+  if (query) {
+    const [byBrand, byModel] = await Promise.all([
+      api.get("/assets/search", { params: { brand: query, type, status } }),
+      api.get("/assets/search", { params: { model: query, type, status } }),
+    ]);
+
+    const combined = [...byBrand.data, ...byModel.data];
+    const unique = combined.filter(
+      (a, index, self) => self.findIndex((b) => b.id === a.id) === index
+    );
+    return { data: unique };
+  }
+
   const clean = {};
   if (params.brand)  clean.brand  = params.brand;
-  if (params.model || params.query) clean.model = params.model || params.query;
+  if (params.model)  clean.model  = params.model;
   if (params.type)   clean.type   = params.type;
   if (params.status) clean.status = params.status;
   return api.get("/assets/search", { params: clean });

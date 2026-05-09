@@ -14,7 +14,7 @@ const Signup = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
-  
+
   const { signup } = useAuth();
   const navigate = useNavigate();
 
@@ -25,14 +25,19 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    
+
     if (formData.password !== formData.confirmPassword) {
       return setError('Passwords do not match');
     }
 
     setLoading(true);
-    const result = await signup(formData);
-    
+
+    // ✅ FIX: strip confirmPassword — backend SignupRequest doesn't have this field
+    // sending it causes @Valid to return 400
+    const { confirmPassword, ...signupPayload } = formData;
+
+    const result = await signup(signupPayload);
+
     if (result.success) {
       setSuccess(true);
       setTimeout(() => navigate('/login'), 2000);
@@ -42,8 +47,17 @@ const Signup = () => {
     setLoading(false);
   };
 
+  const inputStyle = {
+    width: '100%',
+    padding: '0.75rem 0.75rem 0.75rem 40px',
+    borderRadius: 'var(--radius-sm)',
+    border: '1px solid var(--border)',
+    fontSize: '1rem',
+    boxSizing: 'border-box',
+  };
+
   return (
-    <div className="login-container" style={{
+    <div style={{
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -58,17 +72,13 @@ const Signup = () => {
         borderRadius: 'var(--radius-lg)',
         boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
       }}>
+        {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <div style={{
             background: 'var(--secondary)',
-            width: '60px',
-            height: '60px',
-            borderRadius: '15px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 1rem',
-            color: 'white',
+            width: '60px', height: '60px', borderRadius: '15px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            margin: '0 auto 1rem', color: 'white',
             boxShadow: '0 10px 15px -3px rgba(249, 115, 22, 0.5)'
           }}>
             <UserPlus size={32} />
@@ -77,161 +87,89 @@ const Signup = () => {
           <p style={{ color: 'var(--text-muted)' }}>Join AssetTrack management system</p>
         </div>
 
+        {/* Error */}
         {error && (
           <div style={{
-            background: '#fee2e2',
-            color: 'var(--danger)',
-            padding: '0.75rem',
-            borderRadius: 'var(--radius-sm)',
-            marginBottom: '1.5rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            fontSize: '0.9rem'
+            background: '#fee2e2', color: 'var(--danger)',
+            padding: '0.75rem', borderRadius: 'var(--radius-sm)',
+            marginBottom: '1.5rem', display: 'flex', alignItems: 'center',
+            gap: '0.5rem', fontSize: '0.9rem'
           }}>
-            <AlertCircle size={18} />
-            {error}
+            <AlertCircle size={18} /> {error}
           </div>
         )}
 
+        {/* Success */}
         {success && (
           <div style={{
-            background: '#dcfce7',
-            color: 'var(--success)',
-            padding: '0.75rem',
-            borderRadius: 'var(--radius-sm)',
-            marginBottom: '1.5rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            fontSize: '0.9rem'
+            background: '#dcfce7', color: 'var(--success)',
+            padding: '0.75rem', borderRadius: 'var(--radius-sm)',
+            marginBottom: '1.5rem', display: 'flex', alignItems: 'center',
+            gap: '0.5rem', fontSize: '0.9rem'
           }}>
-            <CheckCircle size={18} />
-            Registration successful! Redirecting to login...
+            <CheckCircle size={18} /> Registration successful! Redirecting to login...
           </div>
         )}
 
         <form onSubmit={handleSubmit}>
+
+          {/* Full Name */}
           <div style={{ marginBottom: '1rem' }}>
             <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: '600', fontSize: '0.9rem' }}>Full Name</label>
             <div style={{ position: 'relative' }}>
               <User size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-              <input
-                name="name"
-                type="text"
-                placeholder="John Doe"
-                value={formData.name}
-                onChange={handleChange}
-                required
-                style={{
-                  width: '100%',
-                  padding: '0.75rem 0.75rem 0.75rem 40px',
-                  borderRadius: 'var(--radius-sm)',
-                  border: '1px solid var(--border)',
-                  fontSize: '1rem'
-                }}
-              />
+              <input name="name" type="text" placeholder="John Doe"
+                value={formData.name} onChange={handleChange} required style={inputStyle} />
             </div>
           </div>
 
+          {/* Email */}
           <div style={{ marginBottom: '1rem' }}>
             <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: '600', fontSize: '0.9rem' }}>Email Address</label>
             <div style={{ position: 'relative' }}>
               <Mail size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-              <input
-                name="email"
-                type="email"
-                placeholder="name@company.com"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                style={{
-                  width: '100%',
-                  padding: '0.75rem 0.75rem 0.75rem 40px',
-                  borderRadius: 'var(--radius-sm)',
-                  border: '1px solid var(--border)',
-                  fontSize: '1rem'
-                }}
-              />
+              <input name="email" type="email" placeholder="name@company.com"
+                value={formData.email} onChange={handleChange} required style={inputStyle} />
             </div>
+          </div>
 
+          {/* ✅ Role — now a separate, correctly closed div */}
           <div style={{ marginBottom: '1rem' }}>
             <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: '600', fontSize: '0.9rem' }}>User Role</label>
             <div style={{ position: 'relative' }}>
-              <Shield size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-              <select
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                required
-                style={{
-                  width: '100%',
-                  padding: '0.75rem 0.75rem 0.75rem 40px',
-                  borderRadius: 'var(--radius-sm)',
-                  border: '1px solid var(--border)',
-                  fontSize: '1rem',
-                  appearance: 'none',
-                  backgroundColor: 'white'
-                }}
-              >
+              <Shield size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', zIndex: 1 }} />
+              <select name="role" value={formData.role} onChange={handleChange} required
+                style={{ ...inputStyle, appearance: 'none', backgroundColor: 'white', cursor: 'pointer' }}>
+                {/* ✅ values are UPPERCASE to match backend Role enum exactly */}
                 <option value="ADMIN">Admin</option>
                 <option value="MANAGER">Manager</option>
                 <option value="DEVELOPER">Developer</option>
               </select>
             </div>
           </div>
-          </div>
 
+          {/* Password */}
           <div style={{ marginBottom: '1rem' }}>
             <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: '600', fontSize: '0.9rem' }}>Password</label>
             <div style={{ position: 'relative' }}>
               <Lock size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-              <input
-                name="password"
-                type="password"
-                placeholder="••••••••"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                style={{
-                  width: '100%',
-                  padding: '0.75rem 0.75rem 0.75rem 40px',
-                  borderRadius: 'var(--radius-sm)',
-                  border: '1px solid var(--border)',
-                  fontSize: '1rem'
-                }}
-              />
+              <input name="password" type="password" placeholder="••••••••"
+                value={formData.password} onChange={handleChange} required style={inputStyle} />
             </div>
           </div>
 
+          {/* Confirm Password */}
           <div style={{ marginBottom: '1.5rem' }}>
             <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: '600', fontSize: '0.9rem' }}>Confirm Password</label>
             <div style={{ position: 'relative' }}>
               <Lock size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-              <input
-                name="confirmPassword"
-                type="password"
-                placeholder="••••••••"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                required
-                style={{
-                  width: '100%',
-                  padding: '0.75rem 0.75rem 0.75rem 40px',
-                  borderRadius: 'var(--radius-sm)',
-                  border: '1px solid var(--border)',
-                  fontSize: '1rem'
-                }}
-              />
+              <input name="confirmPassword" type="password" placeholder="••••••••"
+                value={formData.confirmPassword} onChange={handleChange} required style={inputStyle} />
             </div>
           </div>
 
-          <button
-            type="submit"
-            className="btn btn-secondary"
-            disabled={loading}
-            style={{ width: '100%', padding: '0.875rem' }}
-          >
+          <button type="submit" className="btn btn-secondary"
+            disabled={loading} style={{ width: '100%', padding: '0.875rem' }}>
             {loading ? 'Creating account...' : 'Sign Up'}
           </button>
         </form>
