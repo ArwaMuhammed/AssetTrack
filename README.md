@@ -30,9 +30,3 @@ AssetTrack is a web-based application for managing, tracking, and reporting hard
 ## Authentication
 - **Admin Access**: Sign up with an email containing "admin" or manually change the role in the database to `ADMIN`.
 - **JWT**: The frontend handles JWT storage in `localStorage` and attaches it to all authenticated requests.
-
-## Features (Person A)
-- Full Authentication flow (Login/Signup).
-- Protected routes based on User Roles.
-- Admin Panel for user management.
-- Real-time notification UI for asset alerts.
