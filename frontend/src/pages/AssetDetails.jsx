@@ -8,6 +8,7 @@ import {
   returnAsset,
   createConditionReport,
   deleteAsset,
+  updateAsset,
 } from "../services/assetService";
 
 const STATUS_STYLES = {
@@ -105,6 +106,40 @@ export default function AssetDetails() {
     }
   };
 
+  const handleDecommission = async () => {
+    if (!window.confirm("Mark this asset as decommissioned?")) return;
+    try {
+      await updateAsset(id, {
+        brand:                  asset.brand,
+        model:                  asset.model,
+        warrantyExpirationDate: asset.warrantyExpirationDate, // ✅ مش warrantyExpiration
+        status:                 "DECOMMISSIONED",
+      });
+      const res = await getAssetById(id);
+      setAsset(res.data);
+    } catch (e) {
+      alert(e.response?.data?.message || "Failed to decommission asset.");
+    }
+  };
+
+  const handleMarkAsSpare = async () => {
+    if (!window.confirm("This will unassign the asset and mark it as an available spare. Continue?")) return;
+    try {
+      // Try return first (closes active allocation if any)
+      try { await returnAsset(id); } catch { /* no active allocation — ok */ }
+      // Force status to AVAILABLE regardless
+      await updateAsset(id, {
+        brand:                  asset.brand,
+        model:                  asset.model,
+        warrantyExpirationDate: asset.warrantyExpirationDate,
+        status:                 "AVAILABLE",
+      });
+      const res = await getAssetById(id);
+      setAsset(res.data);
+    } catch (e) {
+      alert(e.response?.data?.message || "Failed to mark as spare.");
+    }
+  };
   const handleReport = async () => {
     if (!issueTitle.trim() || !issueDesc.trim()) return;
     setActionLoading(true);
@@ -181,48 +216,69 @@ export default function AssetDetails() {
         </div>
 
         {/* Warranty warning */}
-        {(isExpired || isExpiringSoon) && (
+        {isExpired && asset.type === "LAPTOP" && canManage && asset.status !== "DECOMMISSIONED" && (
           <div style={{
-            marginTop: "1rem", padding: "0.6rem 1rem",
-            background: isExpired ? "#fee2e2" : "#fef3c7",
-            border: `1px solid ${isExpired ? "#fca5a5" : "#fcd34d"}`,
+            marginTop: "1rem",
+            padding: "1rem",
+            background: "#fee2e2",
+            border: "1px solid #fca5a5",
             borderRadius: "var(--radius-sm)",
-            color: isExpired ? "var(--danger)" : "var(--warning)",
-            fontSize: "0.85rem", fontWeight: 500,
           }}>
-            ⚠ {isExpired ? "Warranty expired — consider reassigning as spare or decommissioning." : "Warranty expiring within 30 days."}
+            <p style={{ margin: "0 0 0.75rem", fontWeight: 700, color: "var(--danger)", fontSize: "0.9rem" }}>
+              ⚠ Warranty Expired — Suggested Actions:
+            </p>
+            <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap" }}>
+            <button
+              className="btn"
+              style={{ background: "#fef3c7", border: "1px solid #fcd34d", color: "#d97706", fontSize: "0.85rem" }}
+              onClick={handleMarkAsSpare}
+            >
+              🔄 Mark as Spare
+            </button>
+              <button
+                className="btn"
+                style={{ background: "#fee2e2", border: "1px solid #fca5a5", color: "var(--danger)", fontSize: "0.85rem" }}
+                onClick={() => handleDecommission()}
+              >
+                🗑 Decommission
+              </button>
+            </div>
           </div>
         )}
 
         {/* Action Buttons */}
         <div style={{ display: "flex", gap: "0.75rem", marginTop: "1.25rem", flexWrap: "wrap" }}>
-          {canManage && (
+          {asset.status !== "DECOMMISSIONED" && (
             <>
-              {!asset.assignedTo ? (
-                <button className="btn btn-primary" onClick={() => setAssignModal(true)}>👤 Assign Asset</button>
-              ) : (
+              {canManage && (
                 <>
-                  <button className="btn btn-primary" onClick={() => setAssignModal(true)}>🔄 Reassign Asset</button>
+                  {!asset.assignedTo ? (
+                    <button className="btn btn-primary" onClick={() => setAssignModal(true)}>👤 Assign Asset</button>
+                  ) : (
+                    <>
+                      <button className="btn btn-primary" onClick={() => setAssignModal(true)}>🔄 Reassign Asset</button>
+                      <button className="btn" style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-muted)" }}
+                        onClick={() => setReturnModal(true)}>
+                        ↩ Return Asset
+                      </button>
+                    </>
+                  )}
                   <button className="btn" style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-muted)" }}
-                    onClick={() => setReturnModal(true)}>
-                    ↩ Return Asset
+                    onClick={() => navigate(`/assets/${id}/edit`)}>
+                    ✏️ Edit
                   </button>
                 </>
               )}
-              <button className="btn" style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-muted)" }}
-                onClick={() => navigate(`/assets/${id}/edit`)}>
-                ✏️ Edit
+
+              {/* Report Issue — all roles */}
+              <button className="btn" style={{ background: "#fef3c7", border: "1px solid #fcd34d", color: "#d97706" }}
+                onClick={() => setIssueModal(true)}>
+                ⚠️ Report Issue
               </button>
             </>
           )}
 
-          {/* Report Issue — all roles */}
-          <button className="btn" style={{ background: "#fef3c7", border: "1px solid #fcd34d", color: "#d97706" }}
-            onClick={() => setIssueModal(true)}>
-            ⚠️ Report Issue
-          </button>
-
-          {/* Delete — Admin only */}
+          {/* Delete — Admin only, always visible */}
           {isAdmin && (
             <button className="btn" style={{ background: "#fee2e2", border: "1px solid #fca5a5", color: "var(--danger)", marginLeft: "auto" }}
               onClick={handleDelete}>
