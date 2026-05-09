@@ -48,6 +48,23 @@ public class UserController {
         );
     }
 
+    // POST /api/users
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UserResponse> createUser(@Valid @RequestBody com.assettrack.backend.dto.user.UserRequest request) {
+        return ResponseEntity.ok(userService.createUser(request));
+    }
+
+    // PUT /api/users/{id}
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UserResponse> updateUser(
+            @PathVariable Long id,
+            @Valid @RequestBody com.assettrack.backend.dto.user.UserRequest request,
+            @AuthenticationPrincipal UserDetails currentUser) {
+        return ResponseEntity.ok(userService.updateUser(id, request, currentUser.getUsername()));
+    }
+
     // DELETE /api/users/{id}
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")

@@ -31,10 +31,12 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("No user found with email: " + email));
 
+        String roleName = user.getRole() != null ? user.getRole().name() : "DEVELOPER";
+
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getEmail())
                 .password(user.getPasswordHash())   // field is called passwordHash in the entity
-                .authorities(List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name())))
+                .authorities(List.of(new SimpleGrantedAuthority("ROLE_" + roleName)))
                 .build();
     }
 

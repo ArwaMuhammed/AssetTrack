@@ -18,10 +18,54 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, UserMapper userMapper) {
+    public UserService(UserRepository userRepository, 
+                       UserMapper userMapper, 
+                       org.springframework.security.crypto.password.PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    // CREATE
+    public UserResponse createUser(com.assettrack.backend.dto.user.UserRequest request) {
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new ConflictException("Email already exists: " + request.getEmail());
+        }
+
+        User user = new User();
+        user.setName(request.getName());
+        user.setEmail(request.getEmail());
+        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+        user.setRole(request.getRole());
+
+        return userMapper.toResponse(userRepository.save(user));
+    }
+
+    // UPDATE
+    public UserResponse updateUser(Long id, com.assettrack.backend.dto.user.UserRequest request, String currentAdminEmail) {
+        User targetUser = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+
+        // Check if new email is taken by another user
+        userRepository.findByEmail(request.getEmail()).ifPresent(u -> {
+            if (!u.getId().equals(id)) {
+                throw new ConflictException("Email already taken: " + request.getEmail());
+            }
+        });
+
+        targetUser.setName(request.getName());
+        targetUser.setEmail(request.getEmail());
+        
+        // Only update password if provided
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            targetUser.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+        }
+        
+        targetUser.setRole(request.getRole());
+
+        return userMapper.toResponse(userRepository.save(targetUser));
     }
 
     // GET ALL

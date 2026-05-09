@@ -1,5 +1,6 @@
 package com.assettrack.backend.service;
 
+import com.assettrack.backend.domain.Role;
 import com.assettrack.backend.domain.User;
 import com.assettrack.backend.dto.auth.AuthResponse;
 import com.assettrack.backend.dto.auth.LoginRequest;
@@ -72,15 +73,33 @@ public class AuthService {
     // ======================================================
     public AuthResponse login(LoginRequest request) {
 
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
-        );
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getEmail(),
+                            request.getPassword()
+                    )
+            );
+        } catch (Exception e) {
+            System.err.println("Authentication failed for user: " + request.getEmail());
+            System.err.println("Reason: " + e.getMessage());
+            throw new AuthenticationFailedException("Login failed: " + e.getMessage());
+        }
 
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new AuthenticationFailedException("Invalid email or password"));
+
+        System.out.println("Login Debug - User: " + user.getEmail() + ", Found Role: " + user.getRole() + ", Requested Role: " + request.getRole());
+
+        Role userRole = user.getRole();
+        if (userRole == null) {
+            // If role is null in DB, and they requested DEVELOPER, let them in (or handle as needed)
+            if (request.getRole() != Role.DEVELOPER) {
+                throw new AuthenticationFailedException("User has no role assigned. Please contact admin.");
+            }
+        } else if (!userRole.equals(request.getRole())) {
+            throw new AuthenticationFailedException("Selected role does not match user account role");
+        }
 
         UserDetails userDetails =
                 userDetailsService.loadUserByUsername(user.getEmail());
