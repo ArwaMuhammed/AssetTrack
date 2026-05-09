@@ -1,57 +1,89 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
-import ProtectedRoute from './components/ProtectedRoute';
-import MainLayout from './components/Layout/MainLayout';
-import Login from './pages/Login';
-import Signup from './pages/Signup';
-import Dashboard from './pages/Dashboard';
-import Users from './pages/Admin/Users';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
+import MainLayout from "./components/Layout/MainLayout";
 
-// Simple Unauthorized page
+// ── Person A pages ────────────────────────────────────────────────────────────
+import Login    from "./pages/Login";
+import Signup   from "./pages/Signup";
+import Dashboard from "./pages/Dashboard";
+import Users    from "./pages/Admin/Users";
+
+// ── Person B pages ────────────────────────────────────────────────────────────
+import Assets      from "./pages/Assets";
+import AddAsset    from "./pages/AddAsset";
+import AssetDetails from "./pages/AssetDetails";
+import Search      from "./pages/Search";
+import Reports     from "./pages/Reports";
+
+// ── Misc ──────────────────────────────────────────────────────────────────────
 const Unauthorized = () => (
-  <div style={{ padding: '2rem', textAlign: 'center' }}>
-    <h1 style={{ color: 'var(--danger)' }}>Unauthorized Access</h1>
-    <p>You do not have permission to view this page.</p>
-    <button className="btn btn-primary" onClick={() => window.history.back()} style={{ marginTop: '1rem' }}>Go Back</button>
+  <div style={{ padding: "2rem", textAlign: "center" }}>
+    <h1 style={{ color: "var(--danger)" }}>Unauthorized Access</h1>
+    <p style={{ color: "var(--text-muted)", marginTop: "0.5rem" }}>
+      You do not have permission to view this page.
+    </p>
+    <button
+      className="btn btn-primary"
+      onClick={() => window.history.back()}
+      style={{ marginTop: "1rem" }}
+    >
+      Go Back
+    </button>
   </div>
 );
 
-// Generic Placeholder for other pages
-const Placeholder = ({ title }) => (
-  <div className="card">
-    <h2>{title}</h2>
-    <p style={{ color: 'var(--text-muted)', marginTop: '1rem' }}>
-      This page is part of the Asset Management module (Person B's scope).
-    </p>
-  </div>
-);
+// Helper: lets nested protected routes render their children via <Outlet>
+const OutletProxy = () => <Outlet />;
 
 function App() {
   return (
     <AuthProvider>
       <Router>
         <Routes>
-          {/* Public Routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
+          {/* ── Public ── */}
+          <Route path="/login"        element={<Login />} />
+          <Route path="/signup"       element={<Signup />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
 
-          {/* Protected Routes */}
-          <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
-            <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'MANAGER']}><OutletProxy /></ProtectedRoute>}>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/allocations" element={<Placeholder title="Asset Allocations" />} />
-              <Route path="/reports" element={<Placeholder title="Reports & Analytics" />} />
+          {/* ── Protected (any authenticated user) ── */}
+          <Route
+            element={
+              <ProtectedRoute>
+                <MainLayout />
+              </ProtectedRoute>
+            }
+          >
+            {/* ADMIN + MANAGER only */}
+            <Route
+              element={
+                <ProtectedRoute allowedRoles={["ADMIN", "MANAGER"]}>
+                  <OutletProxy />
+                </ProtectedRoute>
+              }
+            >
+              <Route path="/"          element={<Dashboard />} />
+              <Route path="/reports"   element={<Reports />} />
             </Route>
 
-            <Route path="/assets" element={<Placeholder title="Asset Inventory" />} />
-            <Route path="/settings" element={<Placeholder title="User Settings" />} />
+            {/* All authenticated users */}
+            <Route path="/assets"          element={<Assets />} />
+            <Route path="/assets/add"      element={<AddAsset />} />
+            <Route path="/assets/:id"      element={<AssetDetails />} />
+            {/* Edit reuses AddAsset in edit mode — swap if you have a dedicated EditAsset */}
+            <Route path="/assets/:id/edit" element={<AddAsset editMode />} />
+            <Route path="/search"          element={<Search />} />
 
-            {/* Admin Only Routes */}
-            <Route element={<ProtectedRoute allowedRoles={['ADMIN']}><OutletProxy /></ProtectedRoute>}>
+            {/* ADMIN only */}
+            <Route
+              element={
+                <ProtectedRoute allowedRoles={["ADMIN"]}>
+                  <OutletProxy />
+                </ProtectedRoute>
+              }
+            >
               <Route path="/users" element={<Users />} />
-              <Route path="/sync" element={<Placeholder title="Inventory Sync" />} />
             </Route>
           </Route>
 
@@ -63,8 +95,8 @@ function App() {
   );
 }
 
-// Helper to allow nested protected routes with Outlet
-import { Outlet } from 'react-router-dom';
-const OutletProxy = () => <Outlet />;
-
 export default App;
+
+// export default function App() {
+//   return <h1 style={{color:"red"}}>APP IS WORKING</h1>;
+// }
