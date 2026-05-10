@@ -32,7 +32,7 @@ const Users = () => {
 
   const handleRoleChange = async (id, newRole) => {
     try {
-      await api.put(`/users/${id}/role`, { role: newRole });
+      await api.patch(`/users/${id}/role`, { role: newRole });
       setUsers(users.map(u => u.id === id ? { ...u, role: newRole } : u));
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to update role');
@@ -66,7 +66,7 @@ const Users = () => {
     e.preventDefault();
     try {
       if (editingUser) {
-        await api.put(`/users/${editingUser.id}/role`, { role: formData.role });
+        await api.patch(`/users/${editingUser.id}/role`, { role: formData.role });
       } else {
         await api.post('/auth/signup', {
           name: formData.name,

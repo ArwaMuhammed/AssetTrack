@@ -21,4 +21,6 @@ public interface AssetRepository extends JpaRepository<Asset, Long> {
     List<Asset> findByBrandContainingIgnoreCase(String brand);
 
     List<Asset> findByModelContainingIgnoreCase(String model);
+
+    List<Asset> findByWarrantyExpirationDateBetween(java.time.LocalDate startDate, java.time.LocalDate endDate);
 }

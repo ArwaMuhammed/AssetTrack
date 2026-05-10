@@ -20,11 +20,8 @@ const Sidebar = ({ isOpen }) => {
     { name: 'Dashboard',      icon: <LayoutDashboard size={20} />, path: '/',           roles: ['ADMIN', 'MANAGER'] },
     { name: 'Assets',         icon: <Monitor size={20} />,         path: '/assets',     roles: ['ADMIN', 'MANAGER', 'DEVELOPER'] },
     { name: 'Search',         icon: <Search size={20} />,          path: '/search',     roles: ['ADMIN', 'MANAGER', 'DEVELOPER'] },
-    { name: 'Allocations',    icon: <History size={20} />,         path: '/allocations',roles: ['ADMIN', 'MANAGER'] },
     { name: 'Users',          icon: <Users size={20} />,           path: '/users',      roles: ['ADMIN'] },
-    { name: 'Reports',        icon: <AlertTriangle size={20} />,   path: '/reports',    roles: ['ADMIN', 'MANAGER', 'DEVELOPER'] },
-    { name: 'Inventory Sync', icon: <Cpu size={20} />,             path: '/sync',       roles: ['ADMIN'] },
-    { name: 'Settings',       icon: <Settings size={20} />,        path: '/settings',   roles: ['ADMIN', 'MANAGER', 'DEVELOPER'] },
+    { name: 'Reports',        icon: <AlertTriangle size={20} />,   path: '/reports',    roles: ['ADMIN', 'MANAGER', 'DEVELOPER'] }
   ];
 
   return (

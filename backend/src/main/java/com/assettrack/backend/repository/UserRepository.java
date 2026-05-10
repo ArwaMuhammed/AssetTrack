@@ -14,4 +14,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // Used by AuthService to check if email is already taken during signup
     boolean existsByEmail(String email);
+
+    java.util.List<User> findByRoleIn(java.util.List<com.assettrack.backend.domain.Role> roles);
 }
