@@ -6,6 +6,7 @@ import com.assettrack.backend.domain.NotificationType;
 import com.assettrack.backend.domain.Role;
 import com.assettrack.backend.domain.User;
 import com.assettrack.backend.repository.AccessoryStockRepository;
+import com.assettrack.backend.repository.AssetAllocationRepository;
 import com.assettrack.backend.repository.AssetRepository;
 import com.assettrack.backend.repository.UserRepository;
 import com.assettrack.backend.service.NotificationService;
@@ -22,22 +23,25 @@ public class AlertScheduler {
     private final AccessoryStockRepository accessoryStockRepository;
     private final NotificationService notificationService;
     private final UserRepository userRepository;
+    private final AssetAllocationRepository allocationRepository;
 
     public AlertScheduler(AssetRepository assetRepository,
-                          AccessoryStockRepository accessoryStockRepository,
-                          NotificationService notificationService,
-                          UserRepository userRepository) {
+                        AccessoryStockRepository accessoryStockRepository,
+                        NotificationService notificationService,
+                        UserRepository userRepository,
+                        AssetAllocationRepository allocationRepository) {  
         this.assetRepository = assetRepository;
         this.accessoryStockRepository = accessoryStockRepository;
         this.notificationService = notificationService;
         this.userRepository = userRepository;
+        this.allocationRepository = allocationRepository;  
     }
 
     /**
      * Run daily at 8:00 AM.
      * Check for warranty expirations and low stock, and notify ADMINs and MANAGERs.
      */
-    @Scheduled(cron = "0 0 8 * * *")
+    @Scheduled(cron = "0 * * * * *")
     public void checkAlertsDaily() {
         checkWarrantyExpirations();
         checkLowStock();
@@ -57,25 +61,34 @@ public class AlertScheduler {
         LocalDate today = LocalDate.now();
         LocalDate targetDate = today.plusDays(30);
 
-        // Assets whose warranty is expiring exactly 30 days from today
         List<Asset> expiringAssets = assetRepository.findByWarrantyExpirationDateBetween(today, targetDate);
+        System.out.println("=== SCHEDULER RUNNING === Found " + expiringAssets.size() + " expiring assets");
+        if (expiringAssets.isEmpty()) return;
 
-        if (expiringAssets.isEmpty()) {
-            return;
-        }
-
-        List<User> targetUsers = getAdminsAndManagers();
+        List<User> adminsAndManagers = getAdminsAndManagers();
 
         for (Asset asset : expiringAssets) {
             String title = "Warranty Expiring Soon: " + asset.getBrand() + " " + asset.getModel();
-            String message = String.format("The warranty for asset %s (S/N: %s) will expire on %s.",
-                    asset.getBrand() + " " + asset.getModel(),
-                    asset.getSerialNumber(),
-                    asset.getWarrantyExpirationDate());
+            String message = String.format(
+                "The warranty for asset %s (S/N: %s) will expire on %s.",
+                asset.getBrand() + " " + asset.getModel(),
+                asset.getSerialNumber(),
+                asset.getWarrantyExpirationDate());
 
-            for (User user : targetUsers) {
+            // Notify admins + managers
+            for (User user : adminsAndManagers) {
                 notificationService.sendNotification(user, title, message, NotificationType.WARRANTY_EXPIRATION);
             }
+
+            // Notify assigned user via active allocation
+            allocationRepository.findAll().stream()
+                .filter(a -> a.getAsset().getId().equals(asset.getId()))
+                .filter(a -> a.getReturnedAt() == null)
+                .map(a -> a.getUser())
+                .findFirst()
+                .ifPresent(user ->
+                    notificationService.sendNotification(
+                        user, title, message, NotificationType.WARRANTY_EXPIRATION));
         }
     }
 

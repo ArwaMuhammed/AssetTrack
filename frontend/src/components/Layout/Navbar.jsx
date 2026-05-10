@@ -1,13 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState , useEffect} from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Bell, User, LogOut, Search, Menu } from 'lucide-react';
 import NotificationMenu from '../Notifications/NotificationMenu';
-
+import api from '../../services/api';
 const Navbar = ({ toggleSidebar }) => {
   const { user, logout } = useAuth();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    const fetchCount = async () => {
+      try {
+        const res = await api.get('/notifications/unread');
+        setUnreadCount(res.data.length);
+      } catch { }
+    };
+
+    fetchCount();
+    const interval = setInterval(fetchCount, 30000);
+    return () => clearInterval(interval);
+  }, []);
   return (
     <nav style={{
       height: 'var(--navbar-height)',
@@ -60,16 +74,17 @@ const Navbar = ({ toggleSidebar }) => {
             onMouseOut={(e) => e.currentTarget.style.background = 'none'}
           >
             <Bell size={22} />
-            <span style={{
-              position: 'absolute',
-              top: '6px',
-              right: '6px',
-              width: '10px',
-              height: '10px',
-              background: 'var(--danger)',
-              border: '2px solid white',
-              borderRadius: '50%'
-            }}></span>
+            {unreadCount > 0 ? (
+              <span style={{
+                position: 'absolute', top: 2, right: 2,
+                background: 'var(--danger)', color: '#fff',
+                borderRadius: '50%', width: 18, height: 18,
+                fontSize: 10, fontWeight: 700,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            ) : null}
           </button>
           {showNotifications && <NotificationMenu close={() => setShowNotifications(false)} />}
         </div>

@@ -9,6 +9,13 @@ const NotificationMenu = ({ close }) => {
     fetchNotifications();
   }, []);
 
+  useEffect(() => {
+    fetchNotifications();
+    
+    // Refresh every 30 seconds
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, []);
   const fetchNotifications = async () => {
     try {
       const response = await api.get('/notifications/unread');
@@ -39,16 +46,15 @@ const NotificationMenu = ({ close }) => {
   const getIcon = (type) => {
     switch (type) {
       case 'WARRANTY_EXPIRATION': return <Clock size={16} />;
-      case 'LOW_STOCK': return <ShieldAlert size={16} />;
-      case 'STATUS_CHANGE': return <Info size={16} />;
-      case 'ASSIGNMENT': return <CheckCircle size={16} />;
-      default: return <Info size={16} />;
+      case 'LOW_STOCK':           return <ShieldAlert size={16} />;
+      case 'CONDITION_REPORT':    return <Info size={16} />;  
+      default:                    return <Info size={16} />;
     }
   };
 
   const getColorStyles = (type) => {
     if (type === 'WARRANTY_EXPIRATION') return { background: '#fef3c7', color: '#d97706' };
-    if (type === 'LOW_STOCK') return { background: '#fee2e2', color: '#ef4444' };
+    if (type === 'LOW_STOCK')           return { background: '#fee2e2', color: '#ef4444' };
     return { background: '#e0f2fe', color: '#0ea5e9' };
   };
   return (
